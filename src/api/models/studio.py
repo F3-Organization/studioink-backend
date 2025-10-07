@@ -25,7 +25,7 @@ class Studio(BaseModel):
     subscription_plan = models.CharField(
         max_length=10,
         choices=SubscriptionPlan.choices,
-        default=SubscriptionPlan.SOLO_ARTIST,
+        default=SubscriptionPlan.SOLO,
     )
     subscription_status = models.CharField(
         max_length=10,

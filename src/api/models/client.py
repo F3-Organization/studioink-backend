@@ -22,8 +22,14 @@ class Client(BaseModel):
     )
 
     class Meta:
-        unique_together = ("studio", "email")
-        unique_together = ("studio", "phone_number")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("studio", "email"), name="unique_studio_email"
+            ),
+            models.UniqueConstraint(
+                fields=("studio", "phone_number"), name="unique_studio_phone"
+            ),
+        ]
 
     def __str__(self):
         return self.full_name
