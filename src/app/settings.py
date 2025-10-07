@@ -14,6 +14,9 @@ from os import getenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+TERMS_OF_SERVICE_VERSION = "1.0.0"
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
