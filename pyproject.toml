@@ -11,7 +11,7 @@ dependencies = [
     "django (>=5.2.7,<6.0.0)",
     "djangorestframework (>=3.16.1,<4.0.0)",
     "django-cors-headers (>=4.9.0,<5.0.0)",
-    "psycopg (>=3.2.10,<4.0.0)"
+    "psycopg (>=3.2.10,<4.0.0)",
 ]
 
 [tool.poetry]
@@ -23,5 +23,28 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "pre-commit (>=4.3.0,<5.0.0)"
+    "pre-commit (>=4.3.0,<5.0.0)",
+    "ruff (>=0.13.3,<0.14.0)",
+    "black (>=25.9.0,<26.0.0)",
+    "isort (>=6.1.0,<7.0.0)",
+    "mypy (>=1.18.2,<2.0.0)",
 ]
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+
+[tool.ruff.lint]
+extend-ignore = ["E203"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "tab"
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
