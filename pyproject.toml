@@ -35,6 +35,8 @@ line-length = 88
 
 [tool.isort]
 profile = "black"
+src_paths = ["src"]
+known_first_party = ["api", "app"]
 
 [tool.ruff]
 line-length = 88
