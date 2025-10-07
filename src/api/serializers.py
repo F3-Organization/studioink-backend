@@ -3,6 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from api.models import Studio
+from api.models.artist import ArtistProfile
 from api.models.termsAcceptance import TermsAcceptance
 from api.utils import get_client_ip
 from app import settings
@@ -43,6 +44,7 @@ class CustomRegisterSerializer(serializers.Serializer):
             subscription_plan=Studio.SubscriptionPlan.SOLO,
             subscription_status=Studio.SubscriptionStatus.TRIALING,
         )
+        ArtistProfile.objects.create(user=user, studio=studio)
         TermsAcceptance.objects.create(
             user=user,
             terms_version=settings.TERMS_OF_SERVICE_VERSION,
