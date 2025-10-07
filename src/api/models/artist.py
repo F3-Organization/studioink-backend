@@ -7,6 +7,10 @@ from .base import BaseModel
 
 
 class ArtistProfile(BaseModel):
+    class Role(models.TextChoices):
+        OWNER = "OWNER", "Dono"
+        ARTIST = "ARTIST", "Artista"
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -25,6 +29,12 @@ class ArtistProfile(BaseModel):
         blank=True,
         null=True,
         verbose_name="Foto de Perfil",
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.ARTIST,
+        verbose_name="Função",
     )
 
     def __str__(self):
