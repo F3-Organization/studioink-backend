@@ -19,7 +19,7 @@ class CustomRegisterView(RegisterView):
     queryset = get_user_model().objects.all()
 
     def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = self.perform_create(serializer)
         data = self.get_response_data(user)

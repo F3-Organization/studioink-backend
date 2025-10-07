@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from rest_framework import serializers
 
@@ -12,17 +13,13 @@ from app import settings
 class CustomRegisterSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
-    password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
+    )
     studio_name = serializers.CharField(required=True, allow_blank=True)
     terms_accepted = serializers.BooleanField(required=True)
-
-    def cleaned_data(self):
-        return {
-            "username": self.validated_data.get("username", ""),
-            "email": self.validated_data.get("email", ""),
-            "password": self.validated_data.get("password", ""),
-            "studio_name": self.validated_data.get("studio_name", ""),
-        }
 
     def save(self):
         user, studio = self.create(self.validated_data)
@@ -30,8 +27,6 @@ class CustomRegisterSerializer(serializers.Serializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        self.verify_unique_email(validated_data["email"])
-        self.verify_terms_accepted(validated_data["terms_accepted"])
         ip = get_client_ip(self.context["request"])
         user = User.objects.create_user(
             username=validated_data["username"],
@@ -51,6 +46,13 @@ class CustomRegisterSerializer(serializers.Serializer):
             ip_address=ip,
         )
         return user, studio
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        self.verify_unique_email(attrs["email"])
+        self.verify_terms_accepted(attrs["terms_accepted"])
+        validate_password(attrs["password"])
+        return attrs
 
     def verify_unique_email(self, email):
         if User.objects.filter(email=email).exists():
