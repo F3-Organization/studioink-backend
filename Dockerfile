@@ -23,5 +23,13 @@ COPY src/ /app/
 
 EXPOSE 8000
 
+# Create a dedicated non-root user and ensure ownership of the app directory.
+# Running Celery/Django as non-root avoids the SecurityWarning and is safer in prod.
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+
+# Switch to the non-root user for runtime
+USER app
+
 # Default command (override when running)
 CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
