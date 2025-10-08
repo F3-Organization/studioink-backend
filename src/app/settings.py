@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from os import getenv
 from pathlib import Path
 
+from kombu import Exchange, Queue
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
 TERMS_OF_SERVICE_VERSION = "1.0.0"
@@ -36,6 +38,23 @@ if ALLOWED_HOSTS_ENV:
 
 # Site framework: default to SITE_ID=1 but allow override from env
 SITE_ID = int(getenv("SITE_ID", "1"))
+
+CELERY_BROKER_URL = getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_RESULT_EXPIRES = 3600
+
+CELERY_TASK_ROUTES = {
+    "api.tasks.send_invitation_email_task": {"queue": "emails"},
+}
+
+CELERY_TASK_QUEUES = (
+    Queue("default", Exchange("default"), routing_key="default"),
+    Queue("emails", Exchange("emails"), routing_key="emails"),
+)
 
 
 # Application definition
