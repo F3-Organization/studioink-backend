@@ -35,6 +35,7 @@ dev = [
     "black (>=25.9.0,<26.0.0)",
     "isort (>=6.1.0,<7.0.0)",
     "mypy (>=1.18.2,<2.0.0)",
+    "poethepoet (>=0.37.0,<0.38.0)",
 ]
 
 [tool.black]
@@ -58,3 +59,20 @@ indent-style = "tab"
 [tool.mypy]
 python_version = "3.13"
 ignore_missing_imports = true
+
+
+[tool.poe.tasks]
+# Comandos Docker
+up = "docker compose up -d"
+down = "docker compose down"
+build = "docker compose build"
+logs = "docker compose logs -f"
+restart = "docker compose restart"
+
+# Comandos Django
+migrate = "docker compose exec studioink-backend-api-1 python manage.py migrate"
+makemigrations = "docker compose exec studioink-backend-api-1 python manage.py makemigrations"
+bash = "docker compose exec studioink-backend-api-1 python manage.py bash"
+createsuperuser = "docker compose exec studioink-backend-api-1 python manage.py createsuperuser"
+
+clean = "docker system prune -f"
