@@ -24,5 +24,46 @@ services:
       - db
     restart: on-failure
 
+  rabbitmq:
+    image: rabbitmq:4.1.4-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  redis:
+    image: redis:8.2.2-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  email_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    command: >
+      celery -A app.celery_app worker
+      --loglevel=info
+      --concurrency=4
+      -Q emails
+      -n invitation_email_worker.%h
+    depends_on:
+      - rabbitmq
+      - redis
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.celery_app status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./src:/app
+
 volumes:
   postgres_data:
