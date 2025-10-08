@@ -17,7 +17,7 @@ from kombu import Exchange, Queue
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
-TERMS_OF_SERVICE_VERSION = "1.0.0"
+TERMS_OF_SERVICE_VERSION = getenv("TERMS_OF_SERVICE_VERSION", default="1.0.0")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
