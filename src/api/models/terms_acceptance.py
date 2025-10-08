@@ -33,3 +33,12 @@ class TermsAcceptance(models.Model):
 
     def __str__(self):
         return f"Aceite dos Termos {self.terms_version} por {self.user.username} em {self.acceptance_date.strftime('%d/%m/%Y')}"
+
+    @classmethod
+    def create_terms_acceptance(cls, user, terms_version, ip_address=None):
+        acceptance = cls.objects.create(
+            user=user,
+            terms_version=terms_version,
+            ip_address=ip_address,
+        )
+        return acceptance

@@ -35,3 +35,13 @@ class Studio(BaseModel):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def create_studio_trial(cls, name: str, owner):
+        studio = cls.objects.create(
+            name=name,
+            owner=owner,
+            subscription_plan=cls.SubscriptionPlan.SOLO,
+            subscription_status=cls.SubscriptionStatus.TRIALING,
+        )
+        return studio

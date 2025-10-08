@@ -3,7 +3,7 @@ from .artist import ArtistProfile
 from .base import BaseModel
 from .client import Client
 from .invitation import Invitation
-from .portfolioImage import PortfolioImage
+from .portfolio_image import PortfolioImage
 from .studio import Studio
 
 __all__ = [
