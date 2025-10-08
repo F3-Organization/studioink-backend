@@ -5,12 +5,26 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
+from api.models.invitation import Invitation
+
 logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="emails")
-def send_invitation_email_task(subject, template_name, context, recipient_list):
-    send_email(subject, template_name, context, recipient_list)
+def send_invitation_email_task(self, invitation: Invitation):
+    subject = f"Você foi convidado para se juntar ao studio {invitation.studio.name}!"
+    template_name = "emails/invitation_email.html"
+    context = {
+        "studio_name": invitation.studio.name,
+        "invitation_token": invitation.token,
+        "accept_url": f"{settings.FRONTEND_URL}/accept-invitation/{invitation.token}",
+    }
+    recipient_list = [invitation.email]
+    try:
+        send_email(subject, template_name, context, recipient_list)
+    except Exception as exc:
+        logger.error(f"Error sending invitation email: {exc}")
+        raise self.retry(exc=exc)
 
 
 def send_email(subject, template_name, context, recipient_list):
