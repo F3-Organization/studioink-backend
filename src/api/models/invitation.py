@@ -10,6 +10,7 @@ class Invitation(BaseModel):
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pendente"
         ACCEPTED = "ACCEPTED", "Aceito"
+        REJECTED = "REJECTED", "Rejeitado"
 
     studio = models.ForeignKey(
         Studio, on_delete=models.CASCADE, related_name="invitations"
@@ -22,3 +23,8 @@ class Invitation(BaseModel):
 
     def __str__(self):
         return f"Convite para {self.email} no estúdio {self.studio.name}"
+
+    @classmethod
+    def create_invitation(cls, studio, email):
+        invitation = cls.objects.create(studio=studio, email=email)
+        return invitation

@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from api.models.invitation import Invitation
-from api.permissions.isStudioOwner import IsStudioOwnerOrReadOnly
-from api.permissions.isSubscriptionStudio import IsStudioSubscription
+from api.permissions.is_studio_owner import IsStudioOwnerOrReadOnly
+from api.permissions.is_subscription_studio import IsStudioSubscription
 from api.serializers import InvitationArtistSerializer
-from api.tasks.sendEmail import send_invitation_email_task
+from api.tasks.send_email import send_invitation_email_task
 
 
 class InvitationArtistViewSet(ViewSet):
