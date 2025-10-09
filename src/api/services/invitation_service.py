@@ -5,6 +5,7 @@ from rest_framework.exceptions import APIException, NotFound
 from api.models.artist import ArtistProfile
 from api.models.invitation import Invitation
 from api.models.studio import Studio
+from api.tasks.send_email import send_invitation_email_task
 from api.utils import get_current_user
 
 
@@ -15,7 +16,10 @@ class InvitationService:
             self.__verify_invitation_exists(studio, email)
             self.__verify_not_owner_other_studio(studio, email)
             self.__verify_if_available_to_invite(studio, email)
-            return Invitation.create_invitation(studio, email)
+            invitation = Invitation.create_invitation(studio, email)
+            send_invitation_email_task.delay(invitation)
+            return invitation
+
         except APIException as e:
             raise APIException(
                 f"Failed to create invitation: {e}",
