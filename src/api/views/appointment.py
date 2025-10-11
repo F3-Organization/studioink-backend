@@ -33,8 +33,12 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         )
 
     def create(self, request):
-        AppointmentService()
-        return None
+        service = AppointmentService()
+        appointment = service.create_appointment(request)
+        return Response(
+            self.serializer_class(appointment).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     def retrieve(self, request, pk=None):
         pass

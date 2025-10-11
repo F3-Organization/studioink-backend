@@ -20,8 +20,13 @@ class AppointmentService:
         )
         return self.__create_appointment(request, artist_profile)
 
-    def reschedule_appointment(self, appointment_id, new_start_time, new_end_time):
-        pass
+    def reschedule_appointment(self, appointment_id, request):
+        appointment = self.__get_appointment_by_id(appointment_id)
+        self.__validate_appointment_availability(
+            appointment.artist,
+            request.data.get("start_time"),
+            request.data.get("end_time"),
+        )
 
     def update_appointment_status(self, appointment_id, new_status):
         pass
@@ -64,3 +69,13 @@ class AppointmentService:
             description=request.data.get("description", ""),
             status=request.data.get("status", Appointment.AppointmentStatus.PENDING),
         )
+
+    def __get_appointment_by_id(self, appointment_id):
+        try:
+            return Appointment.objects.get_appointment_by_id(appointment_id)
+        except Appointment.DoesNotExist:
+            logger.error("Appointment not found with ID: %s", appointment_id)
+            raise APIException(
+                "Appointment not found.",
+                code=status.HTTP_404_NOT_FOUND,
+            )
