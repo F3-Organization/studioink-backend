@@ -7,10 +7,6 @@ from api.models.studio import Studio
 
 
 class AppointmentQueryset(models.QuerySet["Appointment"]):
-    pass
-
-
-class AppointmentManager(models.Manager):
     def is_artist_available(self, artist, start_time, end_time):
         return not (
             self.get_queryset()
@@ -21,6 +17,11 @@ class AppointmentManager(models.Manager):
             )
             .exists()
         )
+
+
+class AppointmentManager(models.Manager):
+    def get_appointment_by_id(self, appointment_id) -> "Appointment":
+        return self.get_queryset().get(id=appointment_id)
 
 
 class Appointment(BaseModel):
