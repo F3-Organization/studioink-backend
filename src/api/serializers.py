@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from api.models.appointment import Appointment
 from api.models.invitation import Invitation
+from api.models.time_block import TimeBlock
 from api.services.registration_service import RegistrationService
 
 
@@ -96,3 +97,30 @@ class AppointmentUpdateStatusSerializer(serializers.Serializer):
     status = serializers.ChoiceField(
         choices=Appointment.AppointmentStatus.choices, required=True
     )
+
+
+class TimeBlockSerializer(serializers.ModelSerializer):
+    start_time = serializers.DateTimeField(
+        format="%d/%m/%Y %H:%M",
+        input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S%z"],
+    )
+    end_time = serializers.DateTimeField(
+        format="%d/%m/%Y %H:%M",
+        input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S%z"],
+    )
+
+    class Meta:
+        model = TimeBlock
+        fields = "__all__"
+        read_only_fields = (
+            "id",
+            "studio",
+            "artist",
+            "created_at",
+            "updated_at",
+        )
+
+    def validate(self, attrs):
+        if attrs["end_time"] <= attrs["start_time"]:
+            raise serializers.ValidationError("End time must be after start time.")
+        return attrs
