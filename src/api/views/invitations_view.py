@@ -46,13 +46,13 @@ class InvitationArtistViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        invitation = self.perform_create(serializer)
+        invitation = self.__perform_create(serializer)
         return Response(
             InvitationSerializer(invitation).data,
             status=status.HTTP_201_CREATED,
         )
 
-    def perform_create(self, serializer):
+    def __perform_create(self, serializer):
         invitation = InvitationService().create_invitation(
             serializer.validated_data["email"], self.context["request"]
         )
