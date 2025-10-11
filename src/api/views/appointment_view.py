@@ -1,8 +1,10 @@
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from api.filters import AppointmentFilter
 from api.permissions.is_artist_of_studio import IsArtistOfStudio
@@ -14,7 +16,7 @@ from api.serializers import (
 from api.services.appointment_service import AppointmentService
 
 
-class AppointmentByArtistViewSet(viewsets.ViewSet):
+class AppointmentByArtistViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated, IsArtistOfStudio]
     filterset_class = AppointmentFilter
@@ -36,11 +38,9 @@ class AppointmentByArtistViewSet(viewsets.ViewSet):
         appointments = AppointmentService().get_appointments_for_artist(request)
         filtered_appointments = self.filter_queryset(appointments)
         page = self.paginate_queryset(filtered_appointments)
-
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(filtered_appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
