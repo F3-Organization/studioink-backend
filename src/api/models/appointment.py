@@ -6,7 +6,28 @@ from api.models.client import Client
 from api.models.studio import Studio
 
 
+class AppointmentQueryset(models.QuerySet["Appointment"]):
+    pass
+
+
+class AppointmentManager(models.Manager):
+    def is_artist_available(self, artist, start_time, end_time):
+        return not (
+            self.get_queryset()
+            .filter(
+                artist=artist,
+                start_time__lt=end_time,
+                end_time__gt=start_time,
+            )
+            .exists()
+        )
+
+
 class Appointment(BaseModel):
+    objects: AppointmentManager | AppointmentQueryset = (
+        AppointmentManager.from_queryset(AppointmentQueryset)
+    )
+
     class AppointmentStatus(models.TextChoices):
         PENDING = "PENDING", "Pendente"
         CONFIRMED = "CONFIRMED", "Confirmado"

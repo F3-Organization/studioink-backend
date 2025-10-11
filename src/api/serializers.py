@@ -1,6 +1,7 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from api.models.appointment import Appointment
 from api.services.invitation_service import InvitationService
 from api.services.registration_service import RegistrationService
 
@@ -42,3 +43,9 @@ class InvitationArtistSerializer(serializers.Serializer):
         return service.create_invitation(
             validated_data["email"], self.context["request"]
         )
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = "__all__"
