@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "api.apps.ApiConfig",
     "django_filters",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -180,12 +181,13 @@ REST_FRAMEWORK = {
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
         "rest_framework.filters.SearchFilter",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
 
@@ -193,4 +195,18 @@ REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "access-token",
     "JWT_AUTH_REFRESH_COOKIE": "refresh-token",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "StudioInk API",
+    "DESCRIPTION": "API for StudioInk is a tattoo studio management application.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "TAGS": {
+        "Appointments": "Endpoints related to managing appointments.",
+        "Artists": "Endpoints related to managing artists within studios.",
+        "Clients": "Endpoints related to managing clients.",
+        "Users": "Endpoints related to user authentication and profile management.",
+        "Invitations": "Endpoints related to inviting artists to studios.",
+    },
 }
