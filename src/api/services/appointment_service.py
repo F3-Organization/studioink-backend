@@ -42,6 +42,20 @@ class AppointmentService:
         appointment.save()
         return appointment
 
+    def delete_appointment(self, user, appointment_id):
+        appointment = self.__get_appointment_by_id(appointment_id)
+        if appointment.artist.user != user and not user.is_staff:
+            logger.warning(
+                "User %s attempted to delete appointment %s without permission",
+                user,
+                appointment_id,
+            )
+            raise APIException(
+                "You do not have permission to delete this appointment.",
+                code=status.HTTP_403_FORBIDDEN,
+            )
+        appointment.delete()
+
     def get_appointments_for_studio(self, studio_id):
         return Appointment.objects.filter(studio_id=studio_id)
 

@@ -60,6 +60,17 @@ class AppointmentByArtistViewSet(ListModelMixin, CreateModelMixin, GenericViewSe
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
+        request=None,
+        responses=None,
+        tags=["Appointments"],
+    )
+    @action(detail=True, methods=["delete"], url_path="delete")
+    def delete(self, request, pk=None):
+        service = AppointmentService()
+        service.delete_appointment(request.user, pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
         request=AppointmentRescheduleSerializer,
         responses=AppointmentSerializer,
         tags=["Appointments"],
