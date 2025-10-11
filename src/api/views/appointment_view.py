@@ -7,7 +7,7 @@ from api.filters import AppointmentFilter
 from api.models.appointment import Appointment
 from api.permissions.is_artist_of_studio import IsArtistOfStudio
 from api.serializers import AppointmentSerializer
-from api.services.appointment import AppointmentService
+from api.services.appointment_service import AppointmentService
 
 
 class AppointmentByArtistViewSet(viewsets.ModelViewSet):

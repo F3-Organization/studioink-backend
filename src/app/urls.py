@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from api.views.register import CustomRegisterView
+from api.views.register_view import CustomRegisterView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
