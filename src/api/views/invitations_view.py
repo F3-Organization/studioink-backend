@@ -1,8 +1,9 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import GenericViewSet
 
 from api.models.invitation import Invitation
 from api.permissions.is_studio_owner import IsStudioOwnerOrReadOnly
@@ -12,7 +13,7 @@ from api.services.invitation_service import InvitationService
 from api.tasks.send_email import send_invitation_email_task
 
 
-class InvitationArtistViewSet(ViewSet):
+class InvitationArtistViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     serializer_class = InvitationInputArtistSerializer
     permission_classes = [
         IsAuthenticated,
@@ -25,9 +26,14 @@ class InvitationArtistViewSet(ViewSet):
         responses=InvitationSerializer(many=True),
         tags=["Invitations"],
     )
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         queryset = Invitation.objects.filter(studio__owner=request.user)
-        serializer = InvitationSerializer(queryset, many=True)
+        filtered_queryset = self.filter_queryset(queryset)
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -35,7 +41,7 @@ class InvitationArtistViewSet(ViewSet):
         responses=InvitationSerializer,
         tags=["Invitations"],
     )
-    def create(self, request, *args, **kwargs):
+    def create(self, request):
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
         )
