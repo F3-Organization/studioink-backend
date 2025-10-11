@@ -46,6 +46,13 @@ class InvitationArtistSerializer(serializers.Serializer):
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
+    start_time = serializers.DateTimeField(
+        format="%d/%m/%Y %H:%M", input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S%z"]
+    )
+    end_time = serializers.DateTimeField(
+        format="%d/%m/%Y %H:%M", input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S%z"]
+    )
+
     class Meta:
         model = Appointment
         fields = "__all__"
