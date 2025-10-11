@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 from api.models.artist import ArtistProfile
@@ -9,13 +11,11 @@ from api.models.studio import Studio
 class AppointmentQueryset(models.QuerySet["Appointment"]):
     def is_artist_available(self, artist, start_time, end_time):
         return not (
-            self.get_queryset()
-            .filter(
+            self.filter(
                 artist=artist,
                 start_time__lt=end_time,
                 end_time__gt=start_time,
-            )
-            .exists()
+            ).exists()
         )
 
 
@@ -81,3 +81,15 @@ class Appointment(BaseModel):
 
     def __str__(self):
         return f"{self.client.full_name} com {self.artist.user.username} em {self.start_time.strftime('%d/%m/%Y %H:%M')}"
+
+    @classmethod
+    def reschedule_appointment(
+        cls,
+        appointment: "Appointment",
+        new_start_time: datetime,
+        new_end_time: datetime,
+    ):
+        appointment.start_time = new_start_time
+        appointment.end_time = new_end_time
+        appointment.save()
+        return appointment
