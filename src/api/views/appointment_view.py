@@ -1,10 +1,12 @@
+from drf_spectacular.utils import (
+    extend_schema,
+)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.filters import AppointmentFilter
-from api.models.appointment import Appointment
 from api.permissions.is_artist_of_studio import IsArtistOfStudio
 from api.serializers import (
     AppointmentRescheduleSerializer,
@@ -14,8 +16,7 @@ from api.serializers import (
 from api.services.appointment_service import AppointmentService
 
 
-class AppointmentByArtistViewSet(viewsets.ModelViewSet):
-    queryset = Appointment.objects.all()
+class AppointmentByArtistViewSet(viewsets.ViewSet):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated, IsArtistOfStudio]
     filterset_class = AppointmentFilter
@@ -28,6 +29,11 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         "end_time",
     ]
 
+    @extend_schema(
+        request=None,
+        responses=AppointmentSerializer(many=True),
+        tags=["Appointments"],
+    )
     def list(self, request) -> Response:
         appointments = AppointmentService().get_appointments_for_artist(request)
         filtered_appointments = self.filter_queryset(appointments)
@@ -40,6 +46,11 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(filtered_appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=AppointmentSerializer,
+        responses=AppointmentSerializer,
+        tags=["Appointments"],
+    )
     def create(self, request):
         service = AppointmentService()
         serializer = self.get_serializer(data=request.data)
@@ -50,6 +61,11 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         output_serializer = self.get_serializer(appointment)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        request=AppointmentRescheduleSerializer,
+        responses=AppointmentSerializer,
+        tags=["Appointments"],
+    )
     @action(detail=True, methods=["patch"], url_path="reschedule")
     def reschedule_appointment(self, request, pk=None):
         service = AppointmentService()
@@ -59,6 +75,11 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         output_serializer = self.get_serializer(appointment)
         return Response(output_serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=AppointmentUpdateStatusSerializer,
+        responses=AppointmentSerializer,
+        tags=["Appointments"],
+    )
     @action(detail=True, methods=["patch"], url_path="update-status")
     def update_appointment_status(self, request, pk=None):
         serializer = AppointmentUpdateStatusSerializer(data=request.data)
@@ -69,6 +90,11 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         output_serializer = self.get_serializer(appointment)
         return Response(output_serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=None,
+        responses=AppointmentSerializer(many=True),
+        tags=["Appointments"],
+    )
     @action(detail=False, methods=["get"], url_path=r"studio/(?P<studio_id>[^/.]+)")
     def get_appointments_for_studio(self, request, studio_id):
         service = AppointmentService()
@@ -76,6 +102,11 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=None,
+        responses=AppointmentSerializer(many=True),
+        tags=["Appointments"],
+    )
     @action(detail=False, methods=["get"], url_path=r"client/(?P<client_id>[^/.]+)")
     def get_appointments_for_client(self, request, client_id):
         service = AppointmentService()
@@ -83,6 +114,11 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=None,
+        responses=AppointmentSerializer,
+        tags=["Appointments"],
+    )
     @action(detail=True, methods=["get"], url_path="details")
     def get_appointment_details(self, request, pk=None):
         service = AppointmentService()
