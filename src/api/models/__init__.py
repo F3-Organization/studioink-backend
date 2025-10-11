@@ -5,6 +5,7 @@ from .client import Client
 from .invitation import Invitation
 from .portfolio_image import PortfolioImage
 from .studio import Studio
+from .time_block import TimeBlock
 
 __all__ = [
     "BaseModel",
@@ -14,4 +15,5 @@ __all__ = [
     "Client",
     "PortfolioImage",
     "Invitation",
+    "TimeBlock",
 ]
