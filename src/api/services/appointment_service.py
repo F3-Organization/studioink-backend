@@ -5,6 +5,7 @@ from rest_framework.exceptions import APIException
 
 from api.models.appointment import Appointment
 from api.models.artist import ArtistProfile
+from api.models.time_block import TimeBlock
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class AppointmentService:
             appointment.artist,
             validated_data["start_time"],
             validated_data["end_time"],
+            exclude_appointment_id=appointment.id,
         )
         return Appointment.reschedule_appointment(
             appointment,
@@ -53,11 +55,25 @@ class AppointmentService:
     def get_appointment_details(self, appointment_id):
         return self.__get_appointment_by_id(appointment_id)
 
-    def __validate_appointment_availability(self, artist, start_time, end_time):
+    def __validate_appointment_availability(
+        self,
+        artist,
+        start_time,
+        end_time,
+        exclude_appointment_id: int | None = None,
+    ) -> None:
         is_available = Appointment.objects.is_artist_available(
-            artist, start_time, end_time
+            artist,
+            start_time,
+            end_time,
+            exclude_appointment_id=exclude_appointment_id,
         )
-        if not is_available:
+        has_time_block_conflict = TimeBlock.objects.has_conflict(
+            artist,
+            start_time,
+            end_time,
+        )
+        if not is_available or has_time_block_conflict:
             raise APIException(
                 "The artist is not available at the requested time.",
                 code=status.HTTP_400_BAD_REQUEST,

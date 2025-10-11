@@ -9,14 +9,21 @@ from api.models.studio import Studio
 
 
 class AppointmentQueryset(models.QuerySet["Appointment"]):
-    def is_artist_available(self, artist, start_time, end_time):
-        return not (
-            self.filter(
-                artist=artist,
-                start_time__lt=end_time,
-                end_time__gt=start_time,
-            ).exists()
+    def is_artist_available(
+        self,
+        artist,
+        start_time,
+        end_time,
+        exclude_appointment_id: int | None = None,
+    ) -> bool:
+        qs = self.filter(
+            artist=artist,
+            start_time__lt=end_time,
+            end_time__gt=start_time,
         )
+        if exclude_appointment_id is not None:
+            qs = qs.exclude(id=exclude_appointment_id)
+        return not qs.exists()
 
 
 class AppointmentManager(models.Manager):
