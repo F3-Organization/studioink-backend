@@ -56,3 +56,36 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = "__all__"
+        read_only_fields = (
+            "id",
+            "studio",
+            "artist",
+            "created_at",
+            "updated_at",
+        )
+
+    def validate(self, attrs):
+        if attrs["end_time"] <= attrs["start_time"]:
+            raise serializers.ValidationError("End time must be after start time.")
+        return attrs
+
+
+class AppointmentRescheduleSerializer(serializers.Serializer):
+    start_time = serializers.DateTimeField(
+        input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S%z"],
+        format="%d/%m/%Y %H:%M",
+    )
+    end_time = serializers.DateTimeField(
+        input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S%z"],
+        format="%d/%m/%Y %H:%M",
+    )
+
+    def validate(self, attrs):
+        start, end = attrs["start_time"], attrs["end_time"]
+        if start >= end:
+            raise serializers.ValidationError("End time must be after start time.")
+        return attrs
+
+
+class AppointmentUpdateStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=Appointment.Status.choices, required=True)
