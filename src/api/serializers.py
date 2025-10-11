@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from api.models.appointment import Appointment
-from api.services.invitation_service import InvitationService
+from api.models.invitation import Invitation
 from api.services.registration_service import RegistrationService
 
 
@@ -36,14 +36,14 @@ class CustomRegisterSerializer(serializers.Serializer):
         return value
 
 
-class InvitationArtistSerializer(serializers.Serializer):
+class InvitationInputArtistSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
-    def create(self, validated_data):
-        service = InvitationService()
-        return service.create_invitation(
-            validated_data["email"], self.context["request"]
-        )
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = "__all__"
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
