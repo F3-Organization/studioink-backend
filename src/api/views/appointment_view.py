@@ -28,14 +28,19 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         service = AppointmentService()
         appointments = service.get_appointments_for_artist(request)
         filtered_appointments = self.filter_queryset(appointments)
+        paginated_appointments = self.paginate_queryset(filtered_appointments)
         return Response(
-            self.serializer_class(filtered_appointments, many=True).data,
+            self.serializer_class(paginated_appointments, many=True).data,
             status=status.HTTP_200_OK,
         )
 
     def create(self, request):
         service = AppointmentService()
-        appointment = service.create_appointment(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        appointment = service.create_appointment(
+            request.user, serializer.validated_data
+        )
         return Response(
             self.serializer_class(appointment).data,
             status=status.HTTP_201_CREATED,
@@ -50,7 +55,34 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def retrieve(self, request, pk=None):
+    @action(detail=True, methods=["patch"], url_path="update-status")
+    def update_appointment_status(self, request, pk=None):
+        appointment = AppointmentService().update_appointment_status(
+            pk, request.data.get("status")
+        )
+        return Response(
+            self.serializer_class(appointment).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["get"], url_path="studio/(studio_id)")
+    def get_appointments_for_studio(self, request, studio_id):
+        appointment = AppointmentService().get_appointments_for_studio(studio_id)
+        return Response(
+            self.serializer_class(appointment, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["get"], url_path="client/(client_id)")
+    def get_appointments_for_client(self, request, client_id):
+        appointment = AppointmentService().get_appointments_for_client(client_id)
+        return Response(
+            self.serializer_class(appointment, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["get"], url_path="details")
+    def get_appointment_details(self, request, pk=None):
         service = AppointmentService()
         appointment = service.__get_appointment_by_id(pk)
         return Response(
