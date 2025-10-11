@@ -1,4 +1,5 @@
 from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
 from rest_framework import serializers
 
 from api.models.appointment import Appointment
@@ -65,6 +66,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
+        if attrs["start_time"] < timezone.now():
+            raise serializers.ValidationError("Start time must be in the future.")
         if attrs["end_time"] <= attrs["start_time"]:
             raise serializers.ValidationError("End time must be after start time.")
         return attrs
@@ -81,6 +84,8 @@ class AppointmentRescheduleSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
+        if attrs["start_time"] < timezone.now():
+            raise serializers.ValidationError("Start time must be in the future.")
         start, end = attrs["start_time"], attrs["end_time"]
         if start >= end:
             raise serializers.ValidationError("End time must be after start time.")
@@ -88,4 +93,6 @@ class AppointmentRescheduleSerializer(serializers.Serializer):
 
 
 class AppointmentUpdateStatusSerializer(serializers.Serializer):
-    status = serializers.ChoiceField(choices=Appointment.Status.choices, required=True)
+    status = serializers.ChoiceField(
+        choices=Appointment.AppointmentStatus.choices, required=True
+    )
