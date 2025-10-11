@@ -6,7 +6,11 @@ from rest_framework.response import Response
 from api.filters import AppointmentFilter
 from api.models.appointment import Appointment
 from api.permissions.is_artist_of_studio import IsArtistOfStudio
-from api.serializers import AppointmentSerializer
+from api.serializers import (
+    AppointmentRescheduleSerializer,
+    AppointmentSerializer,
+    AppointmentUpdateStatusSerializer,
+)
 from api.services.appointment_service import AppointmentService
 
 
@@ -25,14 +29,18 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
     ]
 
     def list(self, request) -> Response:
-        service = AppointmentService()
-        appointments = service.get_appointments_for_artist(request)
+        appointments = AppointmentService().get_appointments_for_artist(request)
         filtered_appointments = self.filter_queryset(appointments)
-        paginated_appointments = self.paginate_queryset(filtered_appointments)
-        return Response(
-            self.serializer_class(paginated_appointments, many=True).data,
-            status=status.HTTP_200_OK,
-        )
+        page = self.paginate_queryset(filtered_appointments)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(
+                serializer.data, status=status.HTTP_200_OK
+            )
+
+        serializer = self.get_serializer(filtered_appointments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
         service = AppointmentService()
@@ -41,51 +49,45 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
         appointment = service.create_appointment(
             request.user, serializer.validated_data
         )
-        return Response(
-            self.serializer_class(appointment).data,
-            status=status.HTTP_201_CREATED,
-        )
+        output_serializer = self.get_serializer(appointment)
+        return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["patch"], url_path="reschedule")
     def reschedule_appointment(self, request, pk=None):
         service = AppointmentService()
-        service.reschedule_appointment(pk, request)
-        return Response(
-            {"detail": "Appointment rescheduled successfully."},
-            status=status.HTTP_200_OK,
-        )
+        serializer = AppointmentRescheduleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        appointment = service.reschedule_appointment(pk, serializer.validated_data)
+        output_serializer = self.get_serializer(appointment)
+        return Response(output_serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["patch"], url_path="update-status")
     def update_appointment_status(self, request, pk=None):
+        serializer = AppointmentUpdateStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         appointment = AppointmentService().update_appointment_status(
-            pk, request.data.get("status")
+            pk, serializer.validated_data["status"]
         )
-        return Response(
-            self.serializer_class(appointment).data,
-            status=status.HTTP_200_OK,
-        )
+        output_serializer = self.get_serializer(appointment)
+        return Response(output_serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["get"], url_path="studio/(studio_id)")
+    @action(detail=False, methods=["get"], url_path=r"studio/(?P<studio_id>[^/.]+)")
     def get_appointments_for_studio(self, request, studio_id):
-        appointment = AppointmentService().get_appointments_for_studio(studio_id)
-        return Response(
-            self.serializer_class(appointment, many=True).data,
-            status=status.HTTP_200_OK,
-        )
+        service = AppointmentService()
+        appointments = service.get_appointments_for_studio(studio_id)
+        serializer = self.get_serializer(appointments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["get"], url_path="client/(client_id)")
+    @action(detail=False, methods=["get"], url_path=r"client/(?P<client_id>[^/.]+)")
     def get_appointments_for_client(self, request, client_id):
-        appointment = AppointmentService().get_appointments_for_client(client_id)
-        return Response(
-            self.serializer_class(appointment, many=True).data,
-            status=status.HTTP_200_OK,
-        )
+        service = AppointmentService()
+        appointments = service.get_appointments_for_client(client_id)
+        serializer = self.get_serializer(appointments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["get"], url_path="details")
     def get_appointment_details(self, request, pk=None):
         service = AppointmentService()
-        appointment = service.__get_appointment_by_id(pk)
-        return Response(
-            self.serializer_class(appointment).data,
-            status=status.HTTP_200_OK,
-        )
+        appointment = service.get_appointment_details(pk)
+        serializer = self.get_serializer(appointment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
