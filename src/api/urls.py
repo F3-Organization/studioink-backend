@@ -12,7 +12,7 @@ router.register(
     basename="invitation",
 )
 router.register(
-    r"appointments-by-artist",
+    r"appointments",
     AppointmentByArtistViewSet,
     basename="appointment",
 )
