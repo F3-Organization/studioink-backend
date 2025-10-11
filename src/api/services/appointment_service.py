@@ -12,25 +12,25 @@ logger = logging.getLogger(__name__)
 class AppointmentService:
 
     def create_appointment(self, user, validated_data):
-        artist_profile = self.__get_artist_profile()
+        artist_profile = self.__get_artist_profile(user)
         self.__validate_appointment_availability(
             artist_profile,
-            validated_data.get("start_time"),
-            validated_data.get("end_time"),
+            validated_data["start_time"],
+            validated_data["end_time"],
         )
         return self.__create_appointment(validated_data, artist_profile)
 
-    def reschedule_appointment(self, appointment_id, request):
+    def reschedule_appointment(self, appointment_id, validated_data):
         appointment = self.__get_appointment_by_id(appointment_id)
         self.__validate_appointment_availability(
             appointment.artist,
-            request.data.get("start_time"),
-            request.data.get("end_time"),
+            validated_data["start_time"],
+            validated_data["end_time"],
         )
         return Appointment.reschedule_appointment(
             appointment,
-            request.data.get("start_time"),
-            request.data.get("end_time"),
+            validated_data["start_time"],
+            validated_data["end_time"],
         )
 
     def update_appointment_status(self, appointment_id, new_status):
@@ -44,11 +44,14 @@ class AppointmentService:
         return Appointment.objects.filter(studio_id=studio_id)
 
     def get_appointments_for_artist(self, request):
-        artist_profile = self.__get_artist_profile(request)
+        artist_profile = self.__get_artist_profile(request.user)
         return Appointment.objects.filter(artist=artist_profile)
 
     def get_appointments_for_client(self, client_id):
-        pass
+        return Appointment.objects.filter(client_id=client_id)
+
+    def get_appointment_details(self, appointment_id):
+        return self.__get_appointment_by_id(appointment_id)
 
     def __validate_appointment_availability(self, artist, start_time, end_time):
         is_available = Appointment.objects.is_artist_available(
@@ -60,25 +63,27 @@ class AppointmentService:
                 code=status.HTTP_400_BAD_REQUEST,
             )
 
-    def __get_artist_profile(self, request):
+    def __get_artist_profile(self, user):
         try:
-            return ArtistProfile.objects.get(user=request.user)
+            return ArtistProfile.objects.get(user=user)
         except ArtistProfile.DoesNotExist:
-            logger.error("Artist profile not found for user: %s", request.user)
+            logger.error("Artist profile not found for user: %s", user)
             raise APIException(
                 "Artist profile not found for the current user.",
                 code=status.HTTP_404_NOT_FOUND,
             )
 
-    def __create_appointment(self, request, artist_profile):
+    def __create_appointment(self, validated_data, artist_profile):
         return Appointment.objects.create(
             studio_id=artist_profile.studio_id,
             artist=artist_profile,
-            client_id=request.data.get("client"),
-            start_time=request.data.get("start_time"),
-            end_time=request.data.get("end_time"),
-            description=request.data.get("description", ""),
-            status=request.data.get("status", Appointment.AppointmentStatus.PENDING),
+            client=validated_data["client"],
+            start_time=validated_data["start_time"],
+            end_time=validated_data["end_time"],
+            description=validated_data.get("description", ""),
+            status=validated_data.get("status", Appointment.AppointmentStatus.PENDING),
+            price_quoted=validated_data.get("price_quoted"),
+            deposit_paid=validated_data.get("deposit_paid"),
         )
 
     def __get_appointment_by_id(self, appointment_id):
@@ -110,5 +115,3 @@ class AppointmentService:
                 f"Invalid status transition from {appointment.status} to {new_status}.",
                 code=status.HTTP_400_BAD_REQUEST,
             )
-        appointment.status = new_status
-        appointment.save()
