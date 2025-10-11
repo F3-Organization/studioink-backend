@@ -1,4 +1,5 @@
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -40,5 +41,19 @@ class AppointmentByArtistViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @action(detail=True, methods=["patch"], url_path="reschedule")
+    def reschedule_appointment(self, request, pk=None):
+        service = AppointmentService()
+        service.reschedule_appointment(pk, request)
+        return Response(
+            {"detail": "Appointment rescheduled successfully."},
+            status=status.HTTP_200_OK,
+        )
+
     def retrieve(self, request, pk=None):
-        pass
+        service = AppointmentService()
+        appointment = service.__get_appointment_by_id(pk)
+        return Response(
+            self.serializer_class(appointment).data,
+            status=status.HTTP_200_OK,
+        )
