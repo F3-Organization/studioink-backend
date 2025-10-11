@@ -11,14 +11,14 @@ logger = logging.getLogger(__name__)
 
 class AppointmentService:
 
-    def create_appointment(self, request):
-        artist_profile = self.__get_artist_profile(request)
+    def create_appointment(self, user, validated_data):
+        artist_profile = self.__get_artist_profile()
         self.__validate_appointment_availability(
             artist_profile,
-            request.data.get("start_time"),
-            request.data.get("end_time"),
+            validated_data.get("start_time"),
+            validated_data.get("end_time"),
         )
-        return self.__create_appointment(request, artist_profile)
+        return self.__create_appointment(validated_data, artist_profile)
 
     def reschedule_appointment(self, appointment_id, request):
         appointment = self.__get_appointment_by_id(appointment_id)
@@ -27,12 +27,21 @@ class AppointmentService:
             request.data.get("start_time"),
             request.data.get("end_time"),
         )
+        return Appointment.reschedule_appointment(
+            appointment,
+            request.data.get("start_time"),
+            request.data.get("end_time"),
+        )
 
     def update_appointment_status(self, appointment_id, new_status):
-        pass
+        appointment = self.__get_appointment_by_id(appointment_id)
+        self.__validate_new_status(appointment, new_status)
+        appointment.status = new_status
+        appointment.save()
+        return appointment
 
     def get_appointments_for_studio(self, studio_id):
-        pass
+        return Appointment.objects.filter(studio_id=studio_id)
 
     def get_appointments_for_artist(self, request):
         artist_profile = self.__get_artist_profile(request)
@@ -42,8 +51,10 @@ class AppointmentService:
         pass
 
     def __validate_appointment_availability(self, artist, start_time, end_time):
-        overlap = Appointment.objects.is_artist_available(artist, start_time, end_time)
-        if overlap:
+        is_available = Appointment.objects.is_artist_available(
+            artist, start_time, end_time
+        )
+        if not is_available:
             raise APIException(
                 "The artist is not available at the requested time.",
                 code=status.HTTP_400_BAD_REQUEST,
@@ -79,3 +90,25 @@ class AppointmentService:
                 "Appointment not found.",
                 code=status.HTTP_404_NOT_FOUND,
             )
+
+    def __validate_new_status(self, appointment, new_status):
+        valid_transitions = {
+            Appointment.AppointmentStatus.PENDING: [
+                Appointment.AppointmentStatus.CONFIRMED,
+                Appointment.AppointmentStatus.CANCELED,
+            ],
+            Appointment.AppointmentStatus.CONFIRMED: [
+                Appointment.AppointmentStatus.COMPLETED,
+                Appointment.AppointmentStatus.CANCELED,
+            ],
+            Appointment.AppointmentStatus.COMPLETED: [],
+            Appointment.AppointmentStatus.CANCELED: [],
+        }
+
+        if new_status not in valid_transitions.get(appointment.status, []):
+            raise APIException(
+                f"Invalid status transition from {appointment.status} to {new_status}.",
+                code=status.HTTP_400_BAD_REQUEST,
+            )
+        appointment.status = new_status
+        appointment.save()
