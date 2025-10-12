@@ -66,6 +66,12 @@ indent-style = "tab"
 python_version = "3.13"
 ignore_missing_imports = true
 
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "api.settings"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+addopts = "--cov=src --cov-report=term-missing"
+
+
 
 [tool.poe.tasks]
 # Comandos Docker
