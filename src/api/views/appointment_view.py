@@ -61,6 +61,17 @@ class AppointmentByArtistViewSet(ListModelMixin, CreateModelMixin, GenericViewSe
 
     @extend_schema(
         request=None,
+        responses=AppointmentSerializer,
+        tags=["Appointments"],
+    )
+    def retrieve(self, request, pk=None):
+        service = AppointmentService()
+        appointment = service.get_appointment_details(pk)
+        serializer = self.get_serializer(appointment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
         responses=None,
         tags=["Appointments"],
     )
@@ -121,16 +132,4 @@ class AppointmentByArtistViewSet(ListModelMixin, CreateModelMixin, GenericViewSe
         service = AppointmentService()
         appointments = service.get_appointments_for_client(client_id)
         serializer = self.get_serializer(appointments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        request=None,
-        responses=AppointmentSerializer,
-        tags=["Appointments"],
-    )
-    @action(detail=True, methods=["get"], url_path="details")
-    def get_appointment_details(self, request, pk=None):
-        service = AppointmentService()
-        appointment = service.get_appointment_details(pk)
-        serializer = self.get_serializer(appointment)
         return Response(serializer.data, status=status.HTTP_200_OK)
