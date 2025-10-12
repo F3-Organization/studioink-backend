@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from api.models.appointment import Appointment
+from api.models.client import Client
 from api.models.invitation import Invitation
 from api.models.time_block import TimeBlock
 
@@ -118,4 +119,21 @@ class TimeBlockSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs["end_time"] <= attrs["start_time"]:
             raise serializers.ValidationError("End time must be after start time.")
+        return attrs
+
+
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = "__all__"
+        read_only_fields = (
+            "id",
+            "studio",
+            "created_at",
+            "updated_at",
+        )
+
+    def validate(self, attrs):
+        if "date_of_birth" in attrs and attrs["date_of_birth"] > timezone.now().date():
+            raise serializers.ValidationError("Date of birth cannot be in the future.")
         return attrs

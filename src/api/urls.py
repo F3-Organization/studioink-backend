@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework import routers
 
 from api.views.appointment_view import AppointmentByArtistViewSet
+from api.views.client_view import ClientViewSet
 from api.views.invitations_view import InvitationArtistViewSet
 from api.views.time_block_view import TimeBlockViewSet
 
@@ -21,6 +22,11 @@ router.register(
     r"time-blocks",
     TimeBlockViewSet,
     basename="time-block",
+)
+router.register(
+    r"clients",
+    ClientViewSet,
+    basename="client",
 )
 urlpatterns: list[path] = []
 urlpatterns += router.urls

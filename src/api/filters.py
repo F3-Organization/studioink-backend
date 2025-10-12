@@ -1,6 +1,7 @@
 from django_filters import rest_framework as filters
 
 from api.models.appointment import Appointment
+from api.models.client import Client
 from api.models.time_block import TimeBlock
 
 
@@ -35,4 +36,20 @@ class TimeBlockFilter(filters.FilterSet):
             "block_type",
             "start_time",
             "end_time",
+        ]
+
+
+class ClientFilter(filters.FilterSet):
+    full_name = filters.CharFilter(field_name="full_name", lookup_expr="icontains")
+    email = filters.CharFilter(field_name="email", lookup_expr="icontains")
+    phone_number = filters.CharFilter(
+        field_name="phone_number", lookup_expr="icontains"
+    )
+
+    class Meta:
+        model = Client
+        fields = [
+            "full_name",
+            "email",
+            "phone_number",
         ]
