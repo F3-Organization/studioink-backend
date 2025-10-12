@@ -5,7 +5,6 @@ from rest_framework import serializers
 from api.models.appointment import Appointment
 from api.models.invitation import Invitation
 from api.models.time_block import TimeBlock
-from api.services.registration_service import RegistrationService
 
 
 class CustomRegisterSerializer(serializers.Serializer):
@@ -18,10 +17,6 @@ class CustomRegisterSerializer(serializers.Serializer):
     )
     studio_name = serializers.CharField(required=True, allow_blank=True)
     terms_accepted = serializers.BooleanField(required=True)
-
-    def create(self, validated_data):
-        service = RegistrationService()
-        return service.register_user_and_studio(validated_data, self.context["request"])
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

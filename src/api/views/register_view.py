@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from api.serializers import CustomRegisterSerializer
+from api.services.register_service import RegisterService
 
 
 class CustomRegisterView(RegisterView):
@@ -30,7 +31,9 @@ class CustomRegisterView(RegisterView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer: CustomRegisterSerializer):
-        user, studio = serializer.save()
+        user, studio = RegisterService().register_user_and_studio(
+            serializer.validated_data, self.request
+        )
         if api_settings.USE_JWT:
             self.access_token, self.refresh_token = jwt_encode(user)
         elif api_settings.TOKEN_MODEL:

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import transaction
-from rest_framework.exceptions import ValidationError
+from rest_framework import status
+from rest_framework.exceptions import APIException
 
 from api.models.artist import ArtistProfile
 from api.models.studio import Studio
@@ -9,7 +10,7 @@ from api.utils import get_client_ip
 from app import settings
 
 
-class RegistrationService:
+class RegisterService:
     @transaction.atomic
     def register_user_and_studio(self, validated_data, request):
         self.validate(validated_data)
@@ -21,7 +22,9 @@ class RegistrationService:
             self.__record_terms_acceptance(user, ip_address)
             return user, studio
         except Exception as e:
-            raise ValidationError(f"Registration failed: {e}")
+            raise APIException(
+                f"Registration failed: {e}", code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def validate(self, data):
         self.__validate_unique_email(data["email"])
@@ -52,4 +55,7 @@ class RegistrationService:
 
     def __validate_unique_email(self, email):
         if User.objects.filter(email=email).exists():
-            raise ValidationError("User with this email already exists.")
+            raise APIException(
+                "A user with this email already exists.",
+                code=status.HTTP_409_CONFLICT,
+            )
