@@ -4,6 +4,8 @@ from celery import shared_task
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from rest_framework import status
+from rest_framework.exceptions import APIException
 
 from api.models.invitation import Invitation
 
@@ -11,7 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="emails")
-def send_invitation_email_task(self, invitation: Invitation):
+def send_invitation_email_task(self, invitation_id: int):
+    try:
+        invitation = Invitation.objects.select_related("studio").get(id=invitation_id)
+    except Invitation.DoesNotExist:
+        logger.error("Invitation with id %s not found. Skipping email.", invitation_id)
+        return APIException("Invitation not found.", code=status.HTTP_404_NOT_FOUND)
+
     subject = f"Você foi convidado para se juntar ao studio {invitation.studio.name}!"
     template_name = "emails/invitation_email.html"
     context = {

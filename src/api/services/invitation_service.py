@@ -1,23 +1,22 @@
 from django.forms import ValidationError
 from rest_framework import status
-from rest_framework.exceptions import APIException, NotFound
+from rest_framework.exceptions import APIException
 
 from api.models.artist import ArtistProfile
 from api.models.invitation import Invitation
 from api.models.studio import Studio
 from api.tasks.send_email import send_invitation_email_task
-from api.utils import get_current_user
 
 
 class InvitationService:
-    def create_invitation(self, email, request):
+    def create_invitation(self, email, user):
         try:
-            studio = self.__get_studio(request)
+            studio = self.__get_studio(user)
             self.__verify_invitation_exists(studio, email)
             self.__verify_not_owner_other_studio(studio, email)
             self.__verify_if_available_to_invite(studio, email)
             invitation = Invitation.create_invitation(studio, email)
-            send_invitation_email_task.delay(invitation)
+            send_invitation_email_task.delay(invitation.id)
             return invitation
 
         except APIException as e:
@@ -26,15 +25,15 @@ class InvitationService:
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-    def __get_studio(self, request):
-        current_user = get_current_user(request)
-        if not current_user:
-            raise NotFound("User not found.")
+    def __get_studio(self, user):
         try:
-            studio = Studio.objects.get(owner=current_user)
+            studio = Studio.objects.get(owner=user)
             return studio
         except Studio.DoesNotExist:
-            raise NotFound("Studio not found for the current user.")
+            raise APIException(
+                "Studio not found for the current user.",
+                code=status.HTTP_404_NOT_FOUND,
+            )
 
     def __verify_invitation_exists(self, studio, email):
         if Invitation.objects.filter(
@@ -43,7 +42,7 @@ class InvitationService:
             raise ValidationError("An active invitation for this email already exists.")
 
     def __verify_if_available_to_invite(self, studio, email):
-        if ArtistProfile.objects.is_available_to_invite(studio, email):
+        if not ArtistProfile.objects.is_available_to_invite(studio, email):
             raise ValidationError("This user is already an artist in the studio.")
 
     def __verify_not_owner_other_studio(self, current_studio, email):
