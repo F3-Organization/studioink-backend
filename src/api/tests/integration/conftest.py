@@ -8,6 +8,7 @@ from faker import Faker
 
 from api.services.client_service import ClientService
 from api.services.register_service import RegisterService
+from api.tests.factories import UserFactory
 
 
 @pytest.fixture
@@ -52,6 +53,11 @@ def registered_user(register_user_validated_data, fake_request):
 
 
 @pytest.fixture
+def fake_user():
+    return UserFactory.create()
+
+
+@pytest.fixture
 def client(registered_user, register_client_validated_data):
     service = ClientService()
     return service.create_client(
@@ -85,4 +91,16 @@ def reschedule_appointment_validated_data(client):
     return {
         "start_time": start_time,
         "end_time": end_time,
+    }
+
+
+@pytest.fixture
+def create_time_block_validated_data():
+    start_time = timezone.now() + timedelta(hours=2)
+    end_time = start_time + timedelta(hours=1)
+    return {
+        "start_time": start_time,
+        "end_time": end_time,
+        "block_type": "BREAK",
+        "reason": Faker().sentence(),
     }
