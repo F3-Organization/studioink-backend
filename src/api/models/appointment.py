@@ -33,7 +33,7 @@ class AppointmentManager(models.Manager):
 
 class Appointment(BaseModel):
     objects: AppointmentManager | AppointmentQueryset = (
-        AppointmentManager.from_queryset(AppointmentQueryset)
+        AppointmentManager.from_queryset(AppointmentQueryset)()
     )
 
     class AppointmentStatus(models.TextChoices):
