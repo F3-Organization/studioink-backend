@@ -44,6 +44,7 @@ class InvitationSerializer(serializers.ModelSerializer):
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
+    client_id = serializers.IntegerField(write_only=True)
     start_time = serializers.DateTimeField(
         format="%d/%m/%Y %H:%M", input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S%z"]
     )
@@ -60,6 +61,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "artist",
             "created_at",
             "updated_at",
+            "client",
         )
 
     def validate(self, attrs):
