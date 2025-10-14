@@ -53,8 +53,9 @@ class InvitationArtistViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
         )
 
     def __perform_create(self, serializer):
+        user = self.context["request"].user
         invitation = InvitationService().create_invitation(
-            serializer.validated_data["email"], self.context["request"]
+            serializer.validated_data["email"], user
         )
         send_invitation_email_task(invitation).delay()
         return invitation
