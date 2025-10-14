@@ -11,6 +11,11 @@ from api.services.register_service import RegisterService
 
 
 @pytest.fixture
+def email():
+    return Faker().email()
+
+
+@pytest.fixture
 def register_user_validated_data():
     return {
         "username": Faker().user_name(),
@@ -37,7 +42,7 @@ def fake_request():
 
 
 @pytest.fixture
-def user(register_user_validated_data, fake_request):
+def registered_user(register_user_validated_data, fake_request):
     service = RegisterService()
     user, studio = service.register_user_and_studio(
         register_user_validated_data,
@@ -47,10 +52,10 @@ def user(register_user_validated_data, fake_request):
 
 
 @pytest.fixture
-def client(user, register_client_validated_data):
+def client(registered_user, register_client_validated_data):
     service = ClientService()
     return service.create_client(
-        user,
+        registered_user,
         register_client_validated_data,
     )
 
