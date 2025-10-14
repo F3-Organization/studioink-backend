@@ -26,3 +26,23 @@ class TestTimeBlockService:
         with pytest.raises(Exception) as exc_info:
             service.create_time_block(fake_user, create_time_block_validated_data)
         assert "Artist profile not found for the current user" in str(exc_info.value)
+
+    def test_list_time_blocks_for_artist(
+        self, registered_user, create_time_block_validated_data
+    ):
+        service = TimeBlockService()
+        service.create_time_block(registered_user, create_time_block_validated_data)
+        time_blocks = service.list_time_blocks_for_artist(registered_user)
+        assert time_blocks is not None
+        assert len(time_blocks) == 1
+        assert (
+            time_blocks[0].start_time == create_time_block_validated_data["start_time"]
+        )
+        assert time_blocks[0].end_time == create_time_block_validated_data["end_time"]
+        assert (
+            time_blocks[0].block_type == create_time_block_validated_data["block_type"]
+        )
+        assert time_blocks[0].reason == create_time_block_validated_data["reason"]
+
+    def test_list_time_blocks_for_studio(self):
+        pass
