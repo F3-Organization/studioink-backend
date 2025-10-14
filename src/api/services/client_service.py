@@ -20,6 +20,7 @@ class ClientService:
             validate_data["email"],
             validate_data["phone_number"],
         )
+        validate_data["studio_id"] = studio.id
         return self.__create(validate_data)
 
     def get_clients_for_studio(self, request):
