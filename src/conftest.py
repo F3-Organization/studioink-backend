@@ -17,3 +17,8 @@ def django_db_setup():
     settings.DATABASES["default"]["NAME"] = os.getenv("POSTGRES_NAME")
     settings.DATABASES["default"]["USER"] = os.getenv("POSTGRES_USER")
     settings.DATABASES["default"]["PASSWORD"] = os.getenv("POSTGRES_PASSWORD")
+
+    settings.CELERY_TASK_ALWAYS_EAGER = True
+    settings.CELERY_TASK_EAGER_PROPAGATES = True
+
+    settings.FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
