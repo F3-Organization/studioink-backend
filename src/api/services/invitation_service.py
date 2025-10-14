@@ -10,20 +10,13 @@ from api.tasks.send_email import send_invitation_email_task
 
 class InvitationService:
     def create_invitation(self, email, user):
-        try:
-            studio = self.__get_studio(user)
-            self.__verify_invitation_exists(studio, email)
-            self.__verify_not_owner_other_studio(studio, email)
-            self.__verify_if_available_to_invite(studio, email)
-            invitation = Invitation.create_invitation(studio, email)
-            send_invitation_email_task.delay(invitation.id)
-            return invitation
-
-        except APIException as e:
-            raise APIException(
-                f"Failed to create invitation: {e}",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
+        studio = self.__get_studio(user)
+        self.__verify_invitation_exists(studio, email)
+        self.__verify_not_owner_other_studio(studio, email)
+        self.__verify_if_available_to_invite(studio, email)
+        invitation = Invitation.create_invitation(studio, email)
+        send_invitation_email_task.delay(invitation.id)
+        return invitation
 
     def __get_studio(self, user):
         try:
