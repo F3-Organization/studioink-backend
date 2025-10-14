@@ -1,0 +1,10 @@
+Olá,
+
+Você foi convidado para se juntar ao studio {{ studio_name }}.
+
+Para aceitar o convite, acesse o link abaixo:
+{{ accept_url }}
+
+Este convite é pessoal e intransferível. Caso não reconheça esta mensagem, ignore-a.
+
+Equipe StudioInk
