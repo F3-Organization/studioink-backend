@@ -14,7 +14,10 @@ class ArtistProfileManager(models.Manager):
     def is_owner_other_studio(self, email, current_studio):
         return (
             self.get_queryset()
-            .filter(studio__owner__email__iexact=email)
+            .filter(
+                studio__owner__email__iexact=email,
+                studio__subscription_plan=Studio.SubscriptionPlan.STUDIO,
+            )
             .exclude(studio=current_studio)
             .exists()
         )
@@ -26,7 +29,7 @@ class ArtistProfileManager(models.Manager):
 
 class ArtistProfile(BaseModel):
     objects: ArtistProfileManager | ArtistProfileQueryset = (
-        ArtistProfileManager.from_queryset(ArtistProfileQueryset)
+        ArtistProfileManager.from_queryset(ArtistProfileQueryset)()
     )
 
     class Role(models.TextChoices):
