@@ -32,5 +32,3 @@ class PortfolioImage(BaseModel):
 
     def __str__(self):
         return f"Imagem de {self.artist.user.username} - {self.title or 'Sem Título'}"
-        return f"Imagem de {self.artist.user.username} - {self.title or 'Sem Título'}"
-        return f"Imagem de {self.artist.user.username} - {self.title or 'Sem Título'}"
