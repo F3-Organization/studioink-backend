@@ -147,13 +147,6 @@ class PortfolioImageSerializer(serializers.Serializer):
     title = serializers.CharField(required=False, allow_blank=True)
     description = serializers.CharField(required=False, allow_blank=True)
 
-    def validate(self, attrs):
-        if len(attrs.get("description", "")) > 200:
-            raise serializers.ValidationError(
-                "Description cannot exceed 200 characters."
-            )
-        return attrs
-
 
 class PortfolioImageUpdateTitleSerializer(serializers.Serializer):
     title = serializers.CharField(required=True, allow_blank=False)
