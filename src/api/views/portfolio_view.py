@@ -66,7 +66,10 @@ class PortfolioViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
         tags=["Portfolio"],
     )
     def update(self, request, pk=None) -> Response:
-        pass
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        post = self.service.update_portfolio_post(pk, serializer.validated_data)
+        return Response(post, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=PortfolioImageUpdateTitleSerializer,
