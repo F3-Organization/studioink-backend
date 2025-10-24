@@ -7,12 +7,12 @@ from rest_framework.viewsets import GenericViewSet
 
 from api.filters import ClientFilter
 from api.permissions.is_artist_of_studio import IsArtistOfStudio
-from api.serializers import ClientSerializer
+from api.serializers import ClientModelSerializer
 from api.services.client_service import ClientService
 
 
 class ClientViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
-    serializer_class = ClientSerializer
+    serializer_class = ClientModelSerializer
     permission_classes = [IsAuthenticated, IsArtistOfStudio]
     filterset_class = ClientFilter
     ordering_fields = ["full_name", "email", "phone_number"]
@@ -21,7 +21,7 @@ class ClientViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
 
     @extend_schema(
         request=None,
-        responses=ClientSerializer(many=True),
+        responses=ClientModelSerializer(many=True),
         tags=["Clients"],
     )
     def list(self, request) -> Response:
@@ -34,8 +34,8 @@ class ClientViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
-        request=ClientSerializer,
-        responses=ClientSerializer,
+        request=ClientModelSerializer,
+        responses=ClientModelSerializer,
         tags=["Clients"],
     )
     def create(self, request):
@@ -52,7 +52,7 @@ class ClientViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
 
     @extend_schema(
         request=None,
-        responses=ClientSerializer,
+        responses=ClientModelSerializer,
         tags=["Clients"],
     )
     def retrieve(self, request, pk=None):

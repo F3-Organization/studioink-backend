@@ -124,7 +124,7 @@ class TimeBlockSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class ClientSerializer(serializers.ModelSerializer):
+class ClientModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = "__all__"
@@ -138,4 +138,17 @@ class ClientSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if "date_of_birth" in attrs and attrs["date_of_birth"] > timezone.now().date():
             raise serializers.ValidationError("Date of birth cannot be in the future.")
+        return attrs
+
+
+class PortfolioImageSerializer(serializers.Serializer):
+    image = serializers.ImageField(required=True)
+    title = serializers.CharField(required=False, allow_blank=True)
+    description = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        if len(attrs.get("description", "")) > 200:
+            raise serializers.ValidationError(
+                "Description cannot exceed 200 characters."
+            )
         return attrs
