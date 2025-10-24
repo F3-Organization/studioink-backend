@@ -5,6 +5,7 @@ from rest_framework import serializers
 from api.models.appointment import Appointment
 from api.models.client import Client
 from api.models.invitation import Invitation
+from api.models.portfolio_image import PortfolioImage
 from api.models.time_block import TimeBlock
 
 
@@ -142,7 +143,7 @@ class ClientModelSerializer(serializers.ModelSerializer):
 
 
 class PortfolioImageSerializer(serializers.Serializer):
-    image = serializers.ImageField(required=True)
+    image = serializers.ImageField(required=True, allow_empty_file=False, use_url=True)
     title = serializers.CharField(required=False, allow_blank=True)
     description = serializers.CharField(required=False, allow_blank=True)
 
@@ -152,3 +153,11 @@ class PortfolioImageSerializer(serializers.Serializer):
                 "Description cannot exceed 200 characters."
             )
         return attrs
+
+
+class PortfolioImageUpdateTitleSerializer(serializers.Serializer):
+    title = serializers.CharField(required=True, allow_blank=False)
+
+
+class PortfolioImageUpdateDescriptionSerializer(serializers.Serializer):
+    description = serializers.CharField(required=True, allow_blank=False)

@@ -208,5 +208,6 @@ SPECTACULAR_SETTINGS = {
         "Clients": "Endpoints related to managing clients.",
         "Users": "Endpoints related to user authentication and profile management.",
         "Invitations": "Endpoints related to inviting artists to studios.",
+        "Portfolio": "Endpoints related to managing portfolio posts.",
     },
 }

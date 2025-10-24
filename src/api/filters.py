@@ -3,6 +3,7 @@ from django_filters import rest_framework as filters
 from api.models.appointment import Appointment
 from api.models.client import Client
 from api.models.time_block import TimeBlock
+from api.views.portfolio_view import PortfolioImage
 
 
 class AppointmentFilter(filters.FilterSet):
@@ -52,4 +53,16 @@ class ClientFilter(filters.FilterSet):
             "full_name",
             "email",
             "phone_number",
+        ]
+
+
+class PortfolioImageFilter(filters.FilterSet):
+    title = filters.CharFilter(field_name="title", lookup_expr="icontains")
+    description = filters.CharFilter(field_name="description", lookup_expr="icontains")
+
+    class Meta:
+        model = PortfolioImage
+        fields = [
+            "title",
+            "description",
         ]
