@@ -37,7 +37,7 @@ class PortfolioViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
         serializer = self.get_serializer(filtered_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # Adicionar regra de validação onde só o dono do portfolio pode criar posts
+    # TODO: Adicionar regra de validação onde só o dono do portfolio pode criar posts
     @extend_schema(
         request=PortfolioImageSerializer,
         responses=PortfolioImageSerializer,
