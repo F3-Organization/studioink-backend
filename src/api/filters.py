@@ -2,8 +2,8 @@ from django_filters import rest_framework as filters
 
 from api.models.appointment import Appointment
 from api.models.client import Client
+from api.models.portfolio_image import PortfolioImage
 from api.models.time_block import TimeBlock
-from api.views.portfolio_view import PortfolioImage
 
 
 class AppointmentFilter(filters.FilterSet):
