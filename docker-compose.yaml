@@ -8,16 +8,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    expose:
-      - "5432"
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    ports:
-      - "8000:8000"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 app.wsgi:application"
     env_file:
       - .env
     volumes:
@@ -66,6 +62,18 @@ services:
       retries: 3
     volumes:
       - ./src:/app
+
+  nginx:
+    image: nginx:1.29.3-alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./src/static:/app/static:ro
+      - ./src/media:/app/media:ro
 
 volumes:
   postgres_data:
